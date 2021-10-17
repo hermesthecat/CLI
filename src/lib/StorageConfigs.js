@@ -8,13 +8,19 @@ if (process.platform === "win32") ConfigPath = path.join(os.homedir(), "AppData"
 else if (process.platform === "darwin") ConfigPath = path.join(os.homedir(), "Library", "Preferences", "http_injector_cli.json");
 
 // Base Config
-let Config = {
-  tokens: {}
-}
+let Config = [
+  {
+    host: "",
+    token: ""
+  }
+];
 
 // Load Config
 if (fs.existsSync(ConfigPath)) Config = JSON.parse(fs.readFileSync(ConfigPath));
-else fs.writeFileSync(ConfigPath, JSON.stringify(Config, null, 2));
+else {
+  Config = [];
+  fs.writeFileSync(ConfigPath, JSON.stringify(Config, null, 2));
+}
 
 // Save Config
 function SaveConfig() {
@@ -22,22 +28,25 @@ function SaveConfig() {
 }
 
 // Add Token
-function AddToken(domain, Port, token) {
-  if (Config.tokens[domain]) throw new Error("Token already exists for domain: " + domain);
-  Config.tokens[domain] = {
-    port: Port || 3000,
+function AddToken(domain, token) {
+  if (Config.find(x => x.host === domain)) throw new Error("Token already exists for domain: " + domain);
+  Config.push({
+    host: domain,
+    token: token
+  });
+  SaveConfig();
+  return {
+    host: domain,
     token: token
   };
-  SaveConfig();
-  return Config.tokens[domain];
 }
 
 // Remove Token
 function RemoveToken(domain) {
-  if (!Config.tokens[domain]) throw new Error("Token does not exist for domain: " + domain);
-  delete Config.tokens[domain];
+  if (!(Config.find(x => x.host === domain))) throw new Error("Token does not exist for domain: " + domain);
+  Config = Config.filter(x => x.host !== domain);
   SaveConfig();
-  return domain;
+  return;
 }
 
 // Export
