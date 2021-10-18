@@ -1,7 +1,15 @@
 const inquirer = require("inquirer");
-const ssh_monitor = require("./ssh_monitor");
+const Request = require("../lib/Request");
 
 async function home(host = "", Token = "") {
+  const ssh_monitor = require("./ssh_monitor");
+  const ssh_add_user = require("./AddUser");
+  const remove_user = require("./RemoveUser");
+  const Main = require("../home");
+  const UserList = await Request.Json(`http://${host}/ssh/List?Token=${Token}`);
+
+  console.log(`Users: ${UserList.length}`)
+
   const waitSSHInput = await inquirer.prompt({
     type: "list",
     name: "ssh",
@@ -18,14 +26,19 @@ async function home(host = "", Token = "") {
       {
         name: "SSH Monitor",
         value: "3"
+      },
+      {
+        name: "Back",
+        value: "4"
       }
     ]
   });
 
   // --------------------------
-  if (waitSSHInput.ssh === "1") throw new Error("Not Implemented");
-  else if (waitSSHInput.ssh === "2") throw new Error("Not Implemented");
+  if (waitSSHInput.ssh === "1") return await ssh_add_user(host, Token);
+  else if (waitSSHInput.ssh === "2") return await remove_user(host, Token);
   else if (waitSSHInput.ssh === "3") return await ssh_monitor(host, Token);
+  else if (waitSSHInput.ssh === "4") return await Main(host, Token);
   else return await home(host, Token);
 }
 
