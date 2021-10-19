@@ -3,6 +3,7 @@ const inquirer = require("inquirer");
 
 // Import home´s module
 const SSH_Home = require("./ssh/home");
+const Wireguard_Home = require("./wireguard/home");
 
 function FixTime(time = 0) {
   const Values = [
@@ -49,11 +50,14 @@ function FixTime(time = 0) {
 }
 
 async function Home(host = "localhost:3000", Token = "tks_aaaaaaaaaaaaaaaaaaaaaaaaa_ofvp") {
-  const Info = await Request.Json(`http://${host}`);
-  const DateS = FixTime(Info.host.uptime);
-
-  console.log(`Name: ${Info.host.name}\t Arch: ${Info.host.arch}\t Kernel Release: ${Info.host.release}\t Uptime: ${DateS.time} ${DateS.timeRange}`);
-  console.log(`CPU Cores: ${Info.host.cpus.length}\t\t CPU Model: ${Info.host.cpus[0].model}`);
+  try {
+    const Info = await Request.Json(`http://${host}`);
+    const DateS = FixTime(Info.host.uptime);
+    console.log(`Name: ${Info.host.name}\t Arch: ${Info.host.arch}\t Kernel Release: ${Info.host.release}\t Uptime: ${DateS.time} ${DateS.timeRange}`);
+    console.log(`CPU Cores: ${Info.host.cpus.length}`);
+  } catch (e) {
+    console.log("Connot get Info");
+  }
 
   const questinfo = await (inquirer.prompt({
     type: "list",
@@ -75,7 +79,7 @@ async function Home(host = "localhost:3000", Token = "tks_aaaaaaaaaaaaaaaaaaaaaa
     ]
   }));
 
-  if (questinfo.option == "1") return "wireguard";
+  if (questinfo.option == "1") return await Wireguard_Home(host, Token);
   else if (questinfo.option == "2") return await SSH_Home(host, Token);
   else if (questinfo.option == "3") process.exit(0);
   else return await Home(host, Token);

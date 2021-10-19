@@ -4,6 +4,9 @@ const home = require("./src/home");
 
 async function RenderCLI() {
   const UserConfig = await login();
-  return await home(UserConfig.host, UserConfig.token);
+  while (true) {
+    console.log("\n");
+    try {await home(UserConfig.host, UserConfig.token);} catch (e) {}
+  }
 }
 RenderCLI();
