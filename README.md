@@ -1,2 +1,8 @@
-# Http-Injector-Maneger-CLI
-one of the tools to communicate with Http Injector Server endpoints
+# OFVp Maneger CLI
+
+this on a Client to manage the server's BackEnd with the server endpoints.
+
+## Services that this customer manages
+
+- SSH Users
+- Wireguard Peers
