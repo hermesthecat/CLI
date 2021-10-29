@@ -1,3 +1,4 @@
+const readline = require("readline");
 const Request = require("../lib/Request");
 
 function CalculateTimeConnected (DateReciceve = new Date(), CurrentDate = new Date()) {
@@ -44,7 +45,7 @@ function CalculateTimeConnected (DateReciceve = new Date(), CurrentDate = new Da
   for (let vlu of Values) {
     if (Difference >= vlu.value) {
       Difference = Difference / vlu.value;
-      NameAndValue += `${Math.floor(Difference % vlu.correct_value)} ${vlu.name} `;
+      NameAndValue = `${Math.floor(Difference % vlu.correct_value)} ${vlu.name} ${NameAndValue}`;
       TimeRange++;
     } else break;
   }
@@ -52,9 +53,25 @@ function CalculateTimeConnected (DateReciceve = new Date(), CurrentDate = new Da
 }
 
 async function Home(host = "", Token = "") {
+  let BreakFromReadLine = false;
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.on("keypress", function (ch, key) {
+    // console.log("got \"keypress\"", key);
+    if (key && key.ctrl && key.name === "d") {
+      if (BreakFromReadLine) return;
+      process.stdin.pause();
+      BreakFromReadLine = true;
+    }
+  });
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
   while (true) {
     try {
+      if (BreakFromReadLine) {
+        break
+      }
       console.clear();
+      console.log("Press ctrl + d to exit Ssh Monitor");
       const UsersList = await Request.Json(`http://${host}/ssh/Monitor?Token=${Token}`);
       const BackendData = new Date(UsersList.BackendDate);
       for (const User of Object.getOwnPropertyNames(UsersList).filter(user => user !== "BackendDate")) {
@@ -71,6 +88,7 @@ async function Home(host = "", Token = "") {
     // wait seconds
     await new Promise(resolve => setTimeout(resolve, 4 * 1000));
   }
+  return;
 }
 
 // Export
