@@ -1,5 +1,5 @@
 {
-  "name": "http_injector_cli",
+  "name": "@ofvp-project/cli",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
