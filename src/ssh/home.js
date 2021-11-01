@@ -5,6 +5,7 @@ async function home(host = "", Token = "") {
   const ssh_monitor = require("./ssh_monitor");
   const ssh_add_user = require("./AddUser");
   const remove_user = require("./RemoveUser");
+  const ChangePassword = require("./ChangePassword");
   const Main = require("../home");
   const UserList = await Request.Json(`http://${host}/ssh/List?Token=${Token}`);
 
@@ -28,8 +29,12 @@ async function home(host = "", Token = "") {
         value: "3"
       },
       {
-        name: "Back",
+        name: "Update/Change User Password",
         value: "4"
+      },
+      {
+        name: "Back",
+        value: "-1"
       }
     ]
   });
@@ -38,7 +43,8 @@ async function home(host = "", Token = "") {
   if (waitSSHInput.ssh === "1") return await ssh_add_user(host, Token);
   else if (waitSSHInput.ssh === "2") return await remove_user(host, Token);
   else if (waitSSHInput.ssh === "3") return await ssh_monitor(host, Token);
-  else if (waitSSHInput.ssh === "4") return await Main(host, Token);
+  else if (waitSSHInput.ssh === "-1") return await Main(host, Token);
+  else if (waitSSHInput.ssh === "4") return await ChangePassword(host, Token);
   else return await home(host, Token);
 }
 
