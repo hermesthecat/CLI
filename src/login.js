@@ -1,7 +1,7 @@
 const inquirer = require("inquirer");
 const Request = require("./lib/Request");
 const StorageConfigs = require("./lib/StorageConfigs");
-
+const Args = require("minimist")(process.argv.slice(2));
 
 async function login() {
   const Tokens = StorageConfigs.GetConfig();
@@ -46,7 +46,7 @@ async function login() {
         }
       ]);
       const UserRegister = await Request.Json(`http://${waitUserInputs.host}:${waitUserInputs.port}/auth/Register?Email=${waitRegisterUser.email}&Passworld=${waitRegisterUser.password}`);
-      return StorageConfigs.AddToken(`${waitUserInputs.host}:${waitUserInputs.port}`, UserRegister.token);
+      return StorageConfigs.AddToken(`${waitUserInputs.host}:${waitUserInputs.port}`, UserRegister.token, true);
     }
 
     const user_login = await inquirer.prompt([
@@ -73,7 +73,7 @@ async function login() {
       return await login();
     }
   } else {
-    if (Tokens.length === 1) {
+    if (Tokens.length === 1 && Args.no_auto_login === undefined) {
       return Tokens[0];
     } else {
       const waitUserInputs = await inquirer.prompt([

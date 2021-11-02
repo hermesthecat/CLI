@@ -19,9 +19,12 @@ async function home(host = "", Token = "") {
         name: "Remove Peer",
         value: "Remove"
       });
+    } else {
+      console.log("Wireguard is not avaible on this server");
+      return Back(host, Token);
     }
   } catch (e) {
-    console.log("Cannot connect to API");
+    return console.log("Cannot connect to API");
   }
 
   const WaitUser = await inquirer.prompt({

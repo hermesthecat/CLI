@@ -1,6 +1,7 @@
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
+const Args = require("minimist")(process.argv.slice(2));
 
 // File Storage
 let ConfigPath = path.join(os.homedir(), ".config", "http_injector_cli.json");
@@ -14,7 +15,7 @@ let Config = [
     token: ""
   }
 ];
-
+Args.remove_config ? fs.unlinkSync(ConfigPath) : null;
 // Load Config
 if (fs.existsSync(ConfigPath)) Config = JSON.parse(fs.readFileSync(ConfigPath));
 else {
@@ -28,8 +29,12 @@ function SaveConfig() {
 }
 
 // Add Token
-function AddToken(domain, token) {
-  if (Config.find(x => x.host === domain)) throw new Error("Token already exists for domain: " + domain);
+function AddToken(domain = "", token = "", Replace = false) {
+  if (Replace === false) {
+    if (Config.find(x => x.host === domain)) throw new Error("Token already exists for domain: " + domain);
+  } else {
+    Config = Config.filter(x => x.host !== domain);
+  }
   Config.push({
     host: domain,
     token: token

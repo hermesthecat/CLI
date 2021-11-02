@@ -17,33 +17,34 @@ async function home(host = "", Token = "") {
     message: "What do you want to do?",
     choices: [
       {
-        name: "Add User",
+        name: "Back",
+        value: "-1"
+      },
+      {
+        name: "Monitor",
         value: "1"
       },
       {
-        name: "Remove User",
+        name: "Add User",
         value: "2"
       },
       {
-        name: "SSH Monitor",
+        name: "Remove User",
         value: "3"
       },
       {
         name: "Update/Change User Password",
         value: "4"
       },
-      {
-        name: "Back",
-        value: "-1"
-      }
+      
     ]
   });
 
   // --------------------------
-  if (waitSSHInput.ssh === "1") return await ssh_add_user(host, Token);
-  else if (waitSSHInput.ssh === "2") return await remove_user(host, Token);
-  else if (waitSSHInput.ssh === "3") return await ssh_monitor(host, Token);
-  else if (waitSSHInput.ssh === "-1") return await Main(host, Token);
+  if (waitSSHInput.ssh === "-1") return await Main(host, Token);
+  else if (waitSSHInput.ssh === "1") return await ssh_monitor(host, Token);
+  else if (waitSSHInput.ssh === "2") return await ssh_add_user(host, Token);
+  else if (waitSSHInput.ssh === "3") return await remove_user(host, Token);
   else if (waitSSHInput.ssh === "4") return await ChangePassword(host, Token);
   else return await home(host, Token);
 }

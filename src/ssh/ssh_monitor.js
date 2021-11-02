@@ -1,5 +1,6 @@
 const readline = require("readline");
 const Request = require("../lib/Request");
+const cli_color = require("cli-color");
 
 function CalculateTimeConnected (DateReciceve = new Date(), CurrentDate = new Date()) {
   let Difference = CurrentDate.getTime() - DateReciceve.getTime();
@@ -71,22 +72,28 @@ async function Home(host = "", Token = "") {
         break
       }
       console.clear();
-      console.log("Press ctrl + d to exit Ssh Monitor");
-      const UsersList = await Request.Json(`http://${host}/ssh/Monitor?Token=${Token}`);
-      const BackendData = new Date(UsersList.BackendDate);
-      for (const User of Object.getOwnPropertyNames(UsersList).filter(user => user !== "BackendDate")) {
-        const UserData = UsersList[User];
-        console.log(`${User} -- Connections: ${UserData.connections.length} -- >>:`);
+      console.log(cli_color.greenBright("SSH Monitor"));
+      console.log(cli_color.greenBright("Press ctrl + d to exit SSH Monitor (Have to wait a while to go back to the main screen)"));
+      const SshMonitorResult = await Request.Json(`http://${host}/ssh/Monitor?Token=${Token}`);
+      const UsersList = await Request.Json(`http://${host}/ssh/List?Token=${Token}`);
+      const BackendData = new Date(SshMonitorResult.BackendDate);
+      for (const User of UsersList.map(a => a.username)) {
+        const UserData = SshMonitorResult[User];
+        const UserInfoFromList = UsersList.find(a => a.username === User);
+        let Mess = `${cli_color.redBright(User)} -> Current Connections: ${cli_color.blueBright(UserData.connections.length)}, Max Connections: ${UserInfoFromList.connections === 0 ? cli_color.redBright("Unlimited") : cli_color.yellowBright(UserInfoFromList.connections)}, Time Connected: `;
+        let TimeCC = 0
         for (let Connections of UserData.connections) {
           const CalculatedTime = new Date(Connections.node_Date);
-          console.log(`Connection :-> ${CalculateTimeConnected(CalculatedTime, BackendData)} <-:`);
+          TimeCC += CalculatedTime.getTime() - TimeCC
         }
-        console.log(`:<< ${User}`);
-        console.log();
+        TimeCC !== 0 ? Mess += cli_color.greenBright(CalculateTimeConnected(new Date(TimeCC), BackendData)) : Mess += cli_color.redBright("No Connected")
+        console.log(Mess);
       }
-    } catch (err) {}
+    } catch (err) {
+      console.log(cli_color.redBright(err));
+    }
     // wait seconds
-    await new Promise(resolve => setTimeout(resolve, 4 * 1000));
+    await new Promise(resolve => setTimeout(resolve, 1.5 * 1000));
   }
   return;
 }
